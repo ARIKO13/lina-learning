@@ -13,13 +13,9 @@ export async function POST() {
     const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().slice(0, 7);
 
     // 1. MONTHLY CLEANUP: Aggregate previous month's daily data into recap
-    const usersWithDaily = await db.dailyProgress.findMany({
-      where: { date: { startsWith: prevMonth } },
-      select: { userId: true },
-      distinct: ['userId'],
-    });
+    const userIds = await db.dailyProgress.findDistinctUserIds(prevMonth);
 
-    for (const { userId } of usersWithDaily) {
+    for (const userId of userIds) {
       const daily = await db.dailyProgress.findMany({
         where: { userId, date: { startsWith: prevMonth } },
       });
@@ -51,7 +47,7 @@ export async function POST() {
             totalDays: ey.totalDays + daily.length,
             maxLevel: Math.max(ey.maxLevel, user?.level || 1),
             maxStreak: Math.max(ey.maxStreak, user?.streak || 0),
-            completed: ey.totalDays + daily.length >= 30,
+            completed: ey.totalDays + daily.length >= 30 ? 1 : 0,
           },
         });
       }
@@ -63,7 +59,7 @@ export async function POST() {
     });
 
     for (const yr of completedYears) {
-      const existingCert = await db.certificate.findFirst({
+      const existingCert = await db.certificate.findFirst2({
         where: { userId: yr.userId, season: yr.season, year: yr.year },
       });
       if (!existingCert) {
@@ -78,6 +74,7 @@ export async function POST() {
             totalDays: yr.totalDays,
             maxLevel: yr.maxLevel,
             maxStreak: yr.maxStreak,
+            awardedAt: new Date(),
             expiresAt,
             shareCode: `${yr.year}-s${yr.season}-${yr.userId.slice(0, 8)}`,
           },
@@ -111,7 +108,7 @@ export async function POST() {
     }
 
     return NextResponse.json({
-      monthlyCleaned: usersWithDaily.length,
+      monthlyCleaned: userIds.length,
       certificatesGenerated: completedYears.length - expiredCerts.length,
       certificatesExpired: expiredCerts.length,
     });

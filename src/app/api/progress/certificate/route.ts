@@ -11,11 +11,10 @@ export async function GET(req: NextRequest) {
       cert = await db.certificate.findUnique({ where: { shareCode } });
     } else if (userId) {
       const now = new Date();
-      const active = await db.certificate.findFirst({
+      cert = await db.certificate.findFirst({
         where: { userId, expiresAt: { gt: now } },
         orderBy: { awardedAt: 'desc' },
       });
-      cert = active;
     }
 
     if (!cert) {

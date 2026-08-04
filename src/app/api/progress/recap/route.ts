@@ -5,8 +5,6 @@ export async function GET(req: NextRequest) {
   const userId = req.nextUrl.searchParams.get('userId');
   if (!userId) return NextResponse.json({ error: 'userId required' }, { status: 400 });
 
-  const yearMonth = req.nextUrl.searchParams.get('month') || new Date().toISOString().slice(0, 7);
-
   const recaps = await db.monthlyRecap.findMany({
     where: { userId },
     orderBy: { yearMonth: 'desc' },
@@ -58,7 +56,7 @@ export async function POST(req: NextRequest) {
 
     // Update yearly record
     const year = yearMonth.slice(0, 4);
- const existingYear = await db.yearlyRecord.findFirst({ where: { userId, year } });
+    const existingYear = await db.yearlyRecord.findFirst({ where: { userId, year } });
 
     if (existingYear) {
       await db.yearlyRecord.update({
@@ -69,7 +67,7 @@ export async function POST(req: NextRequest) {
           avgScore: (existingYear.avgScore * existingYear.totalDays + avgScore * dailyData.length) / (existingYear.totalDays + dailyData.length),
           maxLevel: Math.max(existingYear.maxLevel, user?.level || 1),
           maxStreak: Math.max(existingYear.maxStreak, user?.streak || 0),
-          completed: existingYear.totalDays + dailyData.length >= 30,
+          completed: existingYear.totalDays + dailyData.length >= 30 ? 1 : 0,
         },
       });
     }

@@ -8,11 +8,13 @@ export async function GET(req: NextRequest) {
   const today = new Date().toISOString().split('T')[0];
   const yearMonth = today.slice(0, 7);
 
-  const [user, todayProgress, monthlyDays] = await Promise.all([
+  const [user, todayProgress, monthlyDaysResult] = await Promise.all([
     db.user.findUnique({ where: { id: userId } }),
     db.dailyProgress.findUnique({ where: { userId_date: { userId, date: today } } }),
     db.dailyProgress.count({ where: { userId, date: { startsWith: yearMonth } } }),
   ]);
+
+  const monthlyDays = monthlyDaysResult;
 
   if (!user) {
     return NextResponse.json({

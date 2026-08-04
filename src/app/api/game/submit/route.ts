@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
 
     await db.user.upsert({
       where: { id: userId },
-      update: { xp: newXP, level: newTier.level, streak, lastActiveAt: new Date() },
+      update: { xp: newXP, level: newTier.level, streak, lastActiveAt: new Date().toISOString() },
       create: {
         id: userId,
         googleId: userId,
@@ -61,13 +61,13 @@ export async function POST(req: NextRequest) {
         xp: totalXP,
         level: 1,
         streak: 1,
-        lastActiveAt: new Date(),
+        lastActiveAt: new Date().toISOString(),
       },
     });
 
     await db.dailyProgress.upsert({
       where: { userId_date: { userId, date: today } },
-      update: { topic, score: Math.max(score, existingUser ? 0 : 0), xpEarned: totalXP, questionsCount: questions.length, correctCount, timeSpentSeconds: timeSpentSeconds || 0 },
+      update: { topic, score, xpEarned: totalXP, questionsCount: questions.length, correctCount, timeSpentSeconds: timeSpentSeconds || 0 },
       create: { userId, date: today, topic, score, xpEarned: totalXP, questionsCount: questions.length, correctCount, timeSpentSeconds: timeSpentSeconds || 0 },
     });
 
