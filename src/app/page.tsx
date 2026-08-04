@@ -14,6 +14,8 @@ import {
   Mic, Gamepad2, BarChart3, Bot, Settings, Wifi, WifiOff, Radio, LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useSession, signOut } from 'next-auth/react';
+import { useEffect } from 'react';
 
 const TABS = [
   { id: 'stt' as const, label: 'Speech to Text', icon: Mic },
@@ -24,10 +26,36 @@ const TABS = [
 
 export default function Home() {
   const { user, setUser, activeTab, setActiveTab, setSettingsOpen, sttSource, sttStatus, apiKeys } = useAppStore();
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    if (session?.user && status === 'authenticated') {
+      const u = session.user;
+      setUser({
+        id: u.id || u.email || '',
+        email: u.email || '',
+        name: u.name || 'Player',
+        image: u.image || null,
+      });
+    }
+  }, [session, status, setUser]);
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-2 border-emerald-500 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   if (!user) return <LoginScreen />;
 
   const hasAnyKey = !!(apiKeys.groq || apiKeys.gemini || apiKeys.cloudflare);
+
+  const handleLogout = async () => {
+    setUser(null);
+    await signOut({ callbackUrl: '/' });
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
@@ -58,7 +86,7 @@ export default function Home() {
             <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(true)} className="h-8 w-8">
               <Settings className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => { setUser(null); }} className="h-8 w-8" title="Logout">
+            <Button variant="ghost" size="icon" onClick={handleLogout} className="h-8 w-8" title="Logout">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
