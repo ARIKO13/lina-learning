@@ -71,3 +71,29 @@ Stage Summary:
 - Gemini API calls now proxied through Flask when Gemini model selected
 - AI Assistant has Web Scrape mode toggle (scrapes web + asks AI with context = token saving)
 - PDF module creation: 3 methods available in STT panel after recording transcript
+---
+Task ID: 5
+Agent: main + subagent (full-stack-developer)
+Task: Redesign UI to match IdeaApe aesthetic, rename to LINA.LEARNING, add logo
+
+Work Log:
+- Analyzed IdeaApe website design via VLM: clean white bg, orange (#E85D25) accent, Inter font, minimal SaaS
+- Copied user logo (L.png) to public/logo.png
+- Updated globals.css: primary color to orange, reduced border-radius, adjusted dark mode
+- Updated layout.tsx: metadata rebranded to LINA.LEARNING, icon to /logo.png
+- Rewrote login-screen.tsx: ultra-clean IdeaApe-style, logo + brand name, orange Google OAuth button
+- Rewrote page.tsx: sidebar layout (w-64, white, vertical nav) + main content area (bg-[#FAFAFA])
+- Sidebar: logo, nav items with orange active state, settings+logout at bottom, mobile hamburger toggle
+- Redesigned stt-panel.tsx: white cards, orange recording button (rounded-full), clean PDF method cards
+- Redesigned game-panel.tsx: clean white cards, orange CTAs, orange answer selection
+- Redesigned dashboard-panel.tsx: orange accent metrics, clean stat cards
+- Redesigned ai-assistant.tsx: orange send button, orange scrape toggle, orange user bubbles
+- Redesigned settings-dialog.tsx: orange save button, clean inputs
+- Verified: lint clean, dev server compiles, Agent Browser shows login page with LINA.LEARNING branding
+
+Stage Summary:
+- Full UI redesign complete matching IdeaApe aesthetic
+- Brand: ARUSHIKO STT -> LINA.LEARNING
+- Color: green/teal/violet -> orange (#E85D25) primary accent
+- Layout: bottom tabs -> left sidebar navigation
+- All business logic, API calls, game mechanics preserved identically

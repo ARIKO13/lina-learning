@@ -46,24 +46,23 @@ export function SettingsDialog() {
       <DialogContent className="max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <Key className="h-5 w-5 text-primary" />
-            <DialogTitle>API Settings</DialogTitle>
+            <Key className="h-5 w-5 text-[#E85D25]" />
+            <DialogTitle className="text-[#111111]">API Settings</DialogTitle>
           </div>
-          <DialogDescription>
+          <DialogDescription className="text-[#999999]">
             Atur API key untuk mengakses layanan AI. Key disimpan di browser kamu (localStorage).
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          {/* Groq API Key */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="groq-key" className="text-sm font-medium">
+              <Label htmlFor="groq-key" className="text-sm font-medium text-[#111111]">
                 Groq API Key
               </Label>
               <div className="flex items-center gap-1.5">
                 {isSet('groq') && (
-                  <Badge variant="outline" className="gap-1 border-emerald-300 text-emerald-600 text-[10px]">
+                  <Badge variant="outline" className="gap-1 border-green-300 text-green-600 text-[10px]">
                     <Check className="h-2.5 w-2.5" />
                     Aktif
                   </Badge>
@@ -72,7 +71,7 @@ export function SettingsDialog() {
                   href="https://console.groq.com/keys"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-primary hover:underline flex items-center gap-0.5"
+                  className="text-xs text-[#E85D25] hover:underline flex items-center gap-0.5"
                 >
                   Get Key <ExternalLink className="h-2.5 w-2.5" />
                 </a>
@@ -85,29 +84,28 @@ export function SettingsDialog() {
                 value={localKeys.groq}
                 onChange={(e) => setLocalKeys((prev) => ({ ...prev, groq: e.target.value }))}
                 placeholder="gsk_..."
-                className="pr-10"
+                className="pr-10 border-[#E5E5E5]"
               />
               <button
                 onClick={() => toggleShowKey('groq')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#111111]"
               >
                 {showKeys.groq ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-[11px] text-[#999999]">
               Digunakan untuk STT fallback (Whisper) dan chat AI
             </p>
           </div>
 
-          {/* Gemini API Key */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="gemini-key" className="text-sm font-medium">
+              <Label htmlFor="gemini-key" className="text-sm font-medium text-[#111111]">
                 Gemini API Key
               </Label>
               <div className="flex items-center gap-1.5">
                 {isSet('gemini') && (
-                  <Badge variant="outline" className="gap-1 border-emerald-300 text-emerald-600 text-[10px]">
+                  <Badge variant="outline" className="gap-1 border-green-300 text-green-600 text-[10px]">
                     <Check className="h-2.5 w-2.5" />
                     Aktif
                   </Badge>
@@ -116,7 +114,7 @@ export function SettingsDialog() {
                   href="https://aistudio.google.com/apikey"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-primary hover:underline flex items-center gap-0.5"
+                  className="text-xs text-[#E85D25] hover:underline flex items-center gap-0.5"
                 >
                   Get Key <ExternalLink className="h-2.5 w-2.5" />
                 </a>
@@ -129,29 +127,28 @@ export function SettingsDialog() {
                 value={localKeys.gemini}
                 onChange={(e) => setLocalKeys((prev) => ({ ...prev, gemini: e.target.value }))}
                 placeholder="AIza..."
-                className="pr-10"
+                className="pr-10 border-[#E5E5E5]"
               />
               <button
                 onClick={() => toggleShowKey('gemini')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#111111]"
               >
                 {showKeys.gemini ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-[11px] text-[#999999]">
               Google Gemini untuk chat dan generate konten
             </p>
           </div>
 
-          {/* Cloudflare API Key */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="cf-key" className="text-sm font-medium">
+              <Label htmlFor="cf-key" className="text-sm font-medium text-[#111111]">
                 Cloudflare API Key
               </Label>
               <div className="flex items-center gap-1.5">
                 {isSet('cloudflare') && (
-                  <Badge variant="outline" className="gap-1 border-emerald-300 text-emerald-600 text-[10px]">
+                  <Badge variant="outline" className="gap-1 border-green-300 text-green-600 text-[10px]">
                     <Check className="h-2.5 w-2.5" />
                     Aktif
                   </Badge>
@@ -160,7 +157,7 @@ export function SettingsDialog() {
                   href="https://dash.cloudflare.com/profile/api-tokens"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-primary hover:underline flex items-center gap-0.5"
+                  className="text-xs text-[#E85D25] hover:underline flex items-center gap-0.5"
                 >
                   Get Key <ExternalLink className="h-2.5 w-2.5" />
                 </a>
@@ -173,20 +170,19 @@ export function SettingsDialog() {
                 value={localKeys.cloudflare}
                 onChange={(e) => setLocalKeys((prev) => ({ ...prev, cloudflare: e.target.value }))}
                 placeholder="Cloudflare API Token"
-                className="pr-10"
+                className="pr-10 border-[#E5E5E5]"
               />
               <button
                 onClick={() => toggleShowKey('cloudflare')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#111111]"
               >
                 {showKeys.cloudflare ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
 
-          {/* Cloudflare Account ID */}
           <div className="space-y-2">
-            <Label htmlFor="cf-account-id" className="text-sm font-medium">
+            <Label htmlFor="cf-account-id" className="text-sm font-medium text-[#111111]">
               Cloudflare Account ID
             </Label>
             <Input
@@ -195,20 +191,20 @@ export function SettingsDialog() {
               value={localKeys.cloudflareAccountId}
               onChange={(e) => setLocalKeys((prev) => ({ ...prev, cloudflareAccountId: e.target.value }))}
               placeholder="Account ID dari dashboard"
-              className={cn('pr-10', !isSet('cloudflare') && 'opacity-50')}
+              className={cn('pr-10 border-[#E5E5E5]', !isSet('cloudflare') && 'opacity-50')}
               disabled={!localKeys.cloudflare}
             />
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-[11px] text-[#999999]">
               Untuk akses Workers AI (GLM, Kimi, Gemma)
             </p>
           </div>
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button variant="outline" onClick={() => handleOpenChange(false)}>
+          <Button variant="outline" onClick={() => handleOpenChange(false)} className="border-[#E5E5E5] text-[#666666]">
             Batal
           </Button>
-          <Button onClick={handleSave}>Simpan</Button>
+          <Button onClick={handleSave} className="bg-[#E85D25] hover:bg-[#D14E1C] text-white rounded-full">Simpan</Button>
         </div>
       </DialogContent>
     </Dialog>

@@ -17,7 +17,6 @@ import {
   Radio,
   FileText,
   Loader2,
-  Download,
   Palette,
   Zap,
   Monitor,
@@ -28,10 +27,10 @@ import { toast } from 'sonner';
 
 type PDFMethod = 'playwright' | 'weasyprint' | 'jspdf';
 
-const PDF_METHODS: { id: PDFMethod; label: string; desc: string; emoji: string; color: string }[] = [
-  { id: 'playwright', label: 'Playwright', desc: 'Kualitas terbaik, full CSS + cover page', emoji: '𝚟', color: 'text-violet-600 bg-violet-50 dark:bg-violet-950/30' },
-  { id: 'weasyprint', label: 'WeasyPrint', desc: 'Ringan, tanpa Chromium', emoji: '𝚞', color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/30' },
-  { id: 'jspdf', label: 'jsPDF', desc: 'Instant di browser, tanpa server', emoji: '𝚟', color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30' },
+const PDF_METHODS: { id: PDFMethod; label: string; desc: string; color: string }[] = [
+  { id: 'playwright', label: 'Playwright', desc: 'Kualitas terbaik, full CSS + cover page', color: 'text-violet-600 bg-violet-50 dark:bg-violet-950/30' },
+  { id: 'weasyprint', label: 'WeasyPrint', desc: 'Ringan, tanpa Chromium', color: 'text-sky-600 bg-sky-50 dark:bg-sky-950/30' },
+  { id: 'jspdf', label: 'jsPDF', desc: 'Instant di browser, tanpa server', color: 'text-[#E85D25] bg-orange-50 dark:bg-orange-950/30' },
 ];
 
 export function STTPanel() {
@@ -60,7 +59,6 @@ export function STTPanel() {
     setPdfLoading(true);
     try {
       if (method === 'jspdf') {
-        // Method 3: Get JSON data, generate in browser
         const res = await fetch('/api/pdf/jspdf-data?XTransformPort=3030', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -71,7 +69,6 @@ export function STTPanel() {
         generatePDFBrowser(data);
         toast.success('PDF berhasil di-generate di browser!');
       } else {
-        // Method 1 & 2: Server-side PDF generation
         const endpoint = method === 'playwright' ? '/api/pdf/playwright' : '/api/pdf/weasyprint';
         const res = await fetch(`${endpoint}?XTransformPort=3030`, {
           method: 'POST',
@@ -103,18 +100,18 @@ export function STTPanel() {
   };
 
   return (
-    <Card className="border-0 shadow-lg">
+    <Card className="border border-[#E5E5E5] bg-white shadow-none">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">Speech to Text</CardTitle>
+          <CardTitle className="text-base font-semibold text-[#111111]">Speech to Text</CardTitle>
           <div className="flex items-center gap-2">
             <Badge
               variant={sttSource === 'webspeech' ? 'default' : 'secondary'}
               className={cn(
                 'gap-1.5 text-xs',
                 sttSource === 'webspeech'
-                  ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-200'
-                  : 'bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-amber-200'
+                  ? 'bg-orange-100 text-[#E85D25] hover:bg-orange-100 border-orange-200'
+                  : 'bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200'
               )}
             >
               {sttSource === 'webspeech' ? (
@@ -125,7 +122,7 @@ export function STTPanel() {
               {sttSource === 'webspeech' ? 'Web Speech API' : 'Groq Fallback'}
             </Badge>
             {isReconnecting && (
-              <Badge variant="outline" className="gap-1 text-xs animate-pulse">
+              <Badge variant="outline" className="gap-1 text-xs animate-pulse border-[#E5E5E5]">
                 <RefreshCw className="h-3 w-3 animate-spin" />
                 Reconnecting...
               </Badge>
@@ -147,18 +144,18 @@ export function STTPanel() {
           </div>
         )}
 
-        <div className="relative min-h-[200px] rounded-lg border bg-muted/30 p-4">
+        <div className="relative min-h-[200px] rounded-lg border border-[#E5E5E5] bg-[#FAFAFA] p-4">
           <ScrollArea className="h-[200px]">
             <div className="space-y-1">
               {transcript ? (
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{transcript}</p>
+                <p className="text-sm leading-relaxed text-[#111111] whitespace-pre-wrap">{transcript}</p>
               ) : (
-                <p className="text-sm text-muted-foreground italic">
+                <p className="text-sm text-[#999999] italic">
                   {isRecording ? 'Mulai berbicara...' : 'Klik tombol mikrofon untuk mulai merekam'}
                 </p>
               )}
               {interimTranscript && (
-                <p className="text-sm text-muted-foreground italic">{interimTranscript}</p>
+                <p className="text-sm text-[#999999] italic">{interimTranscript}</p>
               )}
             </div>
           </ScrollArea>
@@ -180,8 +177,8 @@ export function STTPanel() {
             disabled={isProcessing}
             size="lg"
             className={cn(
-              'flex-1 gap-2 transition-all',
-              isRecording ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+              'flex-1 gap-2 transition-all rounded-full',
+              isRecording ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-[#E85D25] hover:bg-[#D14E1C] text-white'
             )}
           >
             {isProcessing ? (
@@ -194,7 +191,7 @@ export function STTPanel() {
             {isProcessing ? 'Memproses...' : isRecording ? 'Stop Recording' : 'Start Recording'}
           </Button>
           {transcript && (
-            <Button onClick={clearTranscript} disabled={isRecording || isProcessing} variant="outline" size="lg" className="gap-2">
+            <Button onClick={clearTranscript} disabled={isRecording || isProcessing} variant="outline" size="lg" className="gap-2 rounded-full border-[#E5E5E5]">
               <Trash2 className="h-4 w-4" />
               <span className="hidden sm:inline">Clear</span>
             </Button>
@@ -203,11 +200,11 @@ export function STTPanel() {
 
         {/* PDF Module Generation */}
         {transcript && (
-          <div className="space-y-3 rounded-xl border border-dashed p-4">
+          <div className="space-y-3 rounded-lg border border-dashed border-[#E5E5E5] p-4">
             <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-emerald-600" />
-              <span className="text-sm font-semibold">Buat Modul PDF</span>
-              <Badge variant="outline" className="text-[10px] ml-auto">{transcript.length} karakter</Badge>
+              <FileText className="h-4 w-4 text-[#E85D25]" />
+              <span className="text-sm font-semibold text-[#111111]">Buat Modul PDF</span>
+              <Badge variant="outline" className="text-[10px] ml-auto border-[#E5E5E5] text-[#999999]">{transcript.length} karakter</Badge>
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               {PDF_METHODS.map((m) => (
@@ -216,7 +213,7 @@ export function STTPanel() {
                   onClick={() => generatePDF(m.id)}
                   disabled={pdfLoading}
                   className={cn(
-                    'flex items-center gap-2.5 rounded-lg border-2 p-3 text-left transition-all hover:shadow-sm disabled:opacity-50',
+                    'flex items-center gap-2.5 rounded-lg border border-[#E5E5E5] p-3 text-left transition-all hover:border-[#E85D25] disabled:opacity-50',
                     m.color
                   )}
                 >
@@ -230,7 +227,7 @@ export function STTPanel() {
                     <Monitor className="h-5 w-5 shrink-0" />
                   )}
                   <div className="min-w-0">
-                    <p className="text-xs font-bold">{m.id === 'playwright' ? '𝚟' : m.id === 'weasyprint' ? '𝚞' : '𝚟'} {m.label}</p>
+                    <p className="text-xs font-bold">{m.label}</p>
                     <p className="text-[10px] opacity-70 truncate">{m.desc}</p>
                   </div>
                 </button>
@@ -240,10 +237,10 @@ export function STTPanel() {
         )}
 
         {/* Status Bar */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <div className="flex items-center justify-between text-xs text-[#999999]">
           <div className="flex items-center gap-1.5">
             {sttSource === 'webspeech' ? (
-              <Wifi className="h-3 w-3 text-emerald-500" />
+              <Wifi className="h-3 w-3 text-[#E85D25]" />
             ) : (
               <WifiOff className="h-3 w-3 text-amber-500" />
             )}
@@ -263,8 +260,7 @@ export function STTPanel() {
 }
 
 // jsPDF browser-side generation (Method 3)
-function generatePDFBrowser(data: { title: string; subtitle: string; date: string; sections: { title: string; paragraphs: string[] }[]; branding: string }) {
-  // Dynamic import jsPDF
+function generatePDFBrowser(data: { title: string; subtitle: string; date: string; sections: { title: string; paragraphs: string[] }[]; branding: string; totalParagraphs?: number; totalChars?: number }) {
   const script = document.createElement('script');
   script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js';
   script.onload = () => {
@@ -280,7 +276,6 @@ function generatePDFBrowser(data: { title: string; subtitle: string; date: strin
       if (y > pageH - 30) {
         doc.addPage();
         y = margin;
-        // Footer
         doc.setFontSize(8);
         doc.setTextColor(150);
         doc.text(`${data.branding} - ${data.date}`, pageW / 2, pageH - 10, { align: 'center' });
@@ -299,7 +294,7 @@ function generatePDFBrowser(data: { title: string; subtitle: string; date: strin
     doc.setFontSize(9);
     doc.setTextColor(156, 163, 175);
     doc.text(`Tanggal: ${data.date}`, pageW / 2, 110, { align: 'center' });
-    doc.text(`${data.totalParagraphs} paragraf  |  ${data.totalChars} karakter`, pageW / 2, 118, { align: 'center' });
+    doc.text(`${data.totalParagraphs || 0} paragraf  |  ${data.totalChars || 0} karakter`, pageW / 2, 118, { align: 'center' });
     doc.text(`Dibuat oleh ${data.branding}`, pageW / 2, 130, { align: 'center' });
 
     // TOC page
@@ -326,7 +321,6 @@ function generatePDFBrowser(data: { title: string; subtitle: string; date: strin
       doc.text(sec.title, margin, y);
       y += 8;
 
-      // Section underline
       doc.setDrawColor(5, 150, 105);
       doc.setLineWidth(0.5);
       doc.line(margin, y, margin + 40, y);
