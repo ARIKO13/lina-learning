@@ -47,3 +47,27 @@ Stage Summary:
 - Google OAuth is now the only login method (no more fake credentials)
 - 6-tier system confirmed working (already implemented from prior session)
 - User needs to set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env with real Google Cloud Console credentials
+---
+Task ID: 4
+Agent: main
+Task: Flask backend for Gemini proxy, Web Scrape+AI, 3-method PDF generation
+
+Work Log:
+- Installed Flask, flask-cors, verified WeasyPrint + Playwright + BeautifulSoup4 available
+- Created mini-services/flask-backend/ (port 3030) with 5 endpoints:
+  - POST /api/gemini/chat - Pure Gemini API proxy
+  - POST /api/scrape-and-ask - Web scraping (DuckDuckGo + URL extraction) + AI explanation
+  - POST /api/pdf/playwright - Method 1: Full CSS HTML -> Playwright renders A4 PDF (best quality)
+  - POST /api/pdf/weasyprint - Method 2: Simple HTML -> WeasyPrint renders A4 PDF (lightweight)
+  - POST /api/pdf/jspdf-data - Method 3: Returns JSON for jsPDF browser-side generation (instant)
+- Updated AI Assistant: added Web Scrape toggle button, scrape mode routes to Flask /api/scrape-and-ask
+- Updated STT Panel: added 3-button PDF module generation (Playwright/WeasyPrint/jsPDF) below transcript
+- Added scrapeMode state to Zustand store
+- All API calls to Flask use XTransformPort=3030 per gateway rules
+- Verified: lint clean (0 errors), dev server running, Agent Browser shows login screen
+
+Stage Summary:
+- Flask backend running on port 3030 with all 5 endpoints
+- Gemini API calls now proxied through Flask when Gemini model selected
+- AI Assistant has Web Scrape mode toggle (scrapes web + asks AI with context = token saving)
+- PDF module creation: 3 methods available in STT panel after recording transcript

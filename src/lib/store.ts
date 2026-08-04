@@ -113,6 +113,8 @@ interface AppState {
   setSelectedModel: (m: AIModel) => void;
   isAiLoading: boolean;
   setIsAiLoading: (v: boolean) => void;
+  scrapeMode: boolean;
+  setScrapeMode: (v: boolean) => void;
 
   // Game
   quizQuestions: QuizQuestion[];
@@ -177,6 +179,8 @@ export const useAppStore = create<AppState>()(
       setSelectedModel: (selectedModel) => set({ selectedModel }),
       isAiLoading: false,
       setIsAiLoading: (isAiLoading) => set({ isAiLoading }),
+      scrapeMode: false,
+      setScrapeMode: (scrapeMode) => set({ scrapeMode }),
 
       // Game
       quizQuestions: [],
