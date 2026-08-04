@@ -213,7 +213,7 @@ export const useAppStore = create<AppState>()(
       setActiveTab: (activeTab) => set({ activeTab }),
     }),
     {
-      name: 'arushiko-stt-v2',
+      name: 'lina-learning-v1',
       partialize: (state) => ({
         apiKeys: state.apiKeys,
         selectedModel: state.selectedModel,

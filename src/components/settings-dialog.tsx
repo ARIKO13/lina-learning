@@ -15,7 +15,6 @@ import { Badge } from '@/components/ui/badge';
 import { Key, Eye, EyeOff, Check, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
 
 export function SettingsDialog() {
   const { settingsOpen, setSettingsOpen, apiKeys, setApiKeys } = useAppStore();
@@ -43,26 +42,28 @@ export function SettingsDialog() {
 
   return (
     <Dialog open={settingsOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <Key className="h-5 w-5 text-[#E85D25]" />
-            <DialogTitle className="text-[#111111]">API Settings</DialogTitle>
-          </div>
-          <DialogDescription className="text-[#999999]">
-            Atur API key untuk mengakses layanan AI. Key disimpan di browser kamu (localStorage).
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-md border-white/[0.06] bg-[#18181b] p-0 overflow-hidden">
+        <div className="px-6 pt-6 pb-2">
+          <DialogHeader>
+            <div className="flex items-center gap-2">
+              <Key className="h-5 w-5 text-[#E85D25]" />
+              <DialogTitle className="text-zinc-100">API Settings</DialogTitle>
+            </div>
+            <DialogDescription className="text-zinc-500">
+              Atur API key untuk mengakses layanan AI. Key disimpan di browser kamu (localStorage).
+            </DialogDescription>
+          </DialogHeader>
+        </div>
 
-        <div className="space-y-4 py-2">
+        <div className="px-6 pb-6 space-y-4">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="groq-key" className="text-sm font-medium text-[#111111]">
+              <Label htmlFor="groq-key" className="text-sm font-medium text-zinc-300">
                 Groq API Key
               </Label>
               <div className="flex items-center gap-1.5">
                 {isSet('groq') && (
-                  <Badge variant="outline" className="gap-1 border-green-300 text-green-600 text-[10px]">
+                  <Badge variant="outline" className="gap-1 border-green-500/30 text-green-400 text-[10px] bg-green-500/10">
                     <Check className="h-2.5 w-2.5" />
                     Aktif
                   </Badge>
@@ -84,28 +85,28 @@ export function SettingsDialog() {
                 value={localKeys.groq}
                 onChange={(e) => setLocalKeys((prev) => ({ ...prev, groq: e.target.value }))}
                 placeholder="gsk_..."
-                className="pr-10 border-[#E5E5E5]"
+                className="pr-10 border-white/[0.08] bg-[#0c0c0e] text-zinc-200 placeholder:text-zinc-600"
               />
               <button
                 onClick={() => toggleShowKey('groq')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#111111]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
               >
                 {showKeys.groq ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            <p className="text-[11px] text-[#999999]">
+            <p className="text-[11px] text-zinc-600">
               Digunakan untuk STT fallback (Whisper) dan chat AI
             </p>
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="gemini-key" className="text-sm font-medium text-[#111111]">
+              <Label htmlFor="gemini-key" className="text-sm font-medium text-zinc-300">
                 Gemini API Key
               </Label>
               <div className="flex items-center gap-1.5">
                 {isSet('gemini') && (
-                  <Badge variant="outline" className="gap-1 border-green-300 text-green-600 text-[10px]">
+                  <Badge variant="outline" className="gap-1 border-green-500/30 text-green-400 text-[10px] bg-green-500/10">
                     <Check className="h-2.5 w-2.5" />
                     Aktif
                   </Badge>
@@ -127,28 +128,28 @@ export function SettingsDialog() {
                 value={localKeys.gemini}
                 onChange={(e) => setLocalKeys((prev) => ({ ...prev, gemini: e.target.value }))}
                 placeholder="AIza..."
-                className="pr-10 border-[#E5E5E5]"
+                className="pr-10 border-white/[0.08] bg-[#0c0c0e] text-zinc-200 placeholder:text-zinc-600"
               />
               <button
                 onClick={() => toggleShowKey('gemini')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#111111]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
               >
                 {showKeys.gemini ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            <p className="text-[11px] text-[#999999]">
+            <p className="text-[11px] text-zinc-600">
               Google Gemini untuk chat dan generate konten
             </p>
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="cf-key" className="text-sm font-medium text-[#111111]">
+              <Label htmlFor="cf-key" className="text-sm font-medium text-zinc-300">
                 Cloudflare API Key
               </Label>
               <div className="flex items-center gap-1.5">
                 {isSet('cloudflare') && (
-                  <Badge variant="outline" className="gap-1 border-green-300 text-green-600 text-[10px]">
+                  <Badge variant="outline" className="gap-1 border-green-500/30 text-green-400 text-[10px] bg-green-500/10">
                     <Check className="h-2.5 w-2.5" />
                     Aktif
                   </Badge>
@@ -170,11 +171,11 @@ export function SettingsDialog() {
                 value={localKeys.cloudflare}
                 onChange={(e) => setLocalKeys((prev) => ({ ...prev, cloudflare: e.target.value }))}
                 placeholder="Cloudflare API Token"
-                className="pr-10 border-[#E5E5E5]"
+                className="pr-10 border-white/[0.08] bg-[#0c0c0e] text-zinc-200 placeholder:text-zinc-600"
               />
               <button
                 onClick={() => toggleShowKey('cloudflare')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#111111]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
               >
                 {showKeys.cloudflare ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -182,7 +183,7 @@ export function SettingsDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="cf-account-id" className="text-sm font-medium text-[#111111]">
+            <Label htmlFor="cf-account-id" className="text-sm font-medium text-zinc-300">
               Cloudflare Account ID
             </Label>
             <Input
@@ -191,20 +192,20 @@ export function SettingsDialog() {
               value={localKeys.cloudflareAccountId}
               onChange={(e) => setLocalKeys((prev) => ({ ...prev, cloudflareAccountId: e.target.value }))}
               placeholder="Account ID dari dashboard"
-              className={cn('pr-10 border-[#E5E5E5]', !isSet('cloudflare') && 'opacity-50')}
+              className={`pr-10 border-white/[0.08] bg-[#0c0c0e] text-zinc-200 placeholder:text-zinc-600 ${!isSet('cloudflare') ? 'opacity-50' : ''}`}
               disabled={!localKeys.cloudflare}
             />
-            <p className="text-[11px] text-[#999999]">
+            <p className="text-[11px] text-zinc-600">
               Untuk akses Workers AI (GLM, Kimi, Gemma)
             </p>
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 pt-2">
-          <Button variant="outline" onClick={() => handleOpenChange(false)} className="border-[#E5E5E5] text-[#666666]">
+        <div className="flex justify-end gap-2 px-6 pb-6">
+          <Button variant="outline" onClick={() => handleOpenChange(false)} className="border-white/[0.08] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]">
             Batal
           </Button>
-          <Button onClick={handleSave} className="bg-[#E85D25] hover:bg-[#D14E1C] text-white rounded-full">Simpan</Button>
+          <Button onClick={handleSave} className="bg-[#E85D25] hover:bg-[#d14e1c] text-white rounded-lg">Simpan</Button>
         </div>
       </DialogContent>
     </Dialog>

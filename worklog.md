@@ -97,3 +97,31 @@ Stage Summary:
 - Color: green/teal/violet -> orange (#E85D25) primary accent
 - Layout: bottom tabs -> left sidebar navigation
 - All business logic, API calls, game mechanics preserved identically
+
+---
+Task ID: 1
+Agent: Main Agent
+Task: Complete UI redesign to dark theme matching ideaape.com/dashboard/analyses style, rename to LINA.LEARNING
+
+Work Log:
+- Analyzed ideaape.com/dashboard/analyses page design (dark theme SaaS dashboard)
+- Rewrote globals.css: made dark theme the default with oklch color values matching ideaape's near-black palette, added dark scrollbar styles
+- Added className="dark" to html element in layout.tsx
+- Rewrote page.tsx: dark sidebar (#0c0c0e), dark header with backdrop-blur, ideaape-style nav items with white/[0.06] borders
+- Rewrote login-screen.tsx: dark bg, Google OAuth with real Google colors on dark
+- Rewrote stt-panel.tsx: removed Card component, uses plain divs with dark border/bg, dark transcript area
+- Rewrote ai-assistant.tsx: dark chat bubbles, dark input area, proper dark select dropdown
+- Rewrote game-panel.tsx: dark game UI, dark stat cards with colored accents
+- Rewrote dashboard-panel.tsx: dark dashboard cards, dark stat grid
+- Rewrote settings-dialog.tsx: dark dialog with dark inputs
+- Rewrote certificate-view.tsx: dark certificate design, renamed ARUSHIKO STT to LINA.LEARNING
+- Updated store.ts persist key from 'arushiko-stt-v2' to 'lina-learning-v1'
+- All JSX comments using em-dashes (—) instead of standard (--) to avoid parser issues
+- Files rewritten via bash heredoc to prevent encoding artifacts
+
+Stage Summary:
+- Complete dark theme redesign matching ideaape.com style
+- All components use consistent dark palette: #09090b bg, #0c0c0e sidebar/card, white/[0.06] borders
+- Brand color #E85D25 preserved as accent throughout
+- All ARUSHIKO STT branding renamed to LINA.LEARNING
+- Build passes cleanly with no errors

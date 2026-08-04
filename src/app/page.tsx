@@ -8,7 +8,6 @@ import { AIAssistant } from '@/components/ai-assistant';
 import { SettingsDialog } from '@/components/settings-dialog';
 import { LoginScreen } from '@/components/login-screen';
 import { CertificateView } from '@/components/certificate-view';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Mic, Gamepad2, BarChart3, Bot, Settings, Wifi, WifiOff, Radio, LogOut,
@@ -53,7 +52,7 @@ export default function Home() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-[#09090b]">
         <div className="animate-spin h-8 w-8 border-2 border-[#E85D25] border-t-transparent rounded-full" />
       </div>
     );
@@ -74,36 +73,32 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#FAFAFA]">
-      {/* Mobile overlay */}
+    <div className="min-h-screen flex bg-[#09090b]">
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/30 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-[#E5E5E5] flex flex-col transition-transform duration-200 ease-in-out lg:relative lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 w-[260px] bg-[#0c0c0e] border-r border-white/[0.06] flex flex-col transition-transform duration-200 ease-in-out lg:relative lg:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        {/* Sidebar Header */}
-        <div className="flex items-center gap-3 px-5 h-16 border-b border-[#E5E5E5]">
-          <img src="/logo.png" alt="LINA" className="h-8 w-8 rounded-lg" />
-          <span className="text-base font-bold tracking-tight text-[#111111]">LINA</span>
+        <div className="flex items-center gap-3 px-5 h-14 border-b border-white/[0.06]">
+          <img src="/logo.png" alt="LINA" className="h-7 w-7 rounded-lg" />
+          <span className="text-sm font-semibold tracking-tight text-white">LINA.LEARNING</span>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="ml-auto lg:hidden p-1 rounded-md hover:bg-[#F5F5F5]"
+            className="ml-auto lg:hidden p-1 rounded-md hover:bg-white/[0.06] transition-colors"
           >
-            <X className="h-5 w-5 text-[#666666]" />
+            <X className="h-4 w-4 text-zinc-400" />
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 py-4 px-3 space-y-1">
+        <nav className="flex-1 py-3 px-3 space-y-0.5">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -112,58 +107,55 @@ export default function Home() {
                 key={tab.id}
                 onClick={() => handleTabClick(tab.id)}
                 className={cn(
-                  'w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all border-l-2',
+                  'w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-all',
                   isActive
-                    ? 'bg-[#FFF5F0] text-[#E85D25] border-[#E85D25]'
-                    : 'text-[#666666] border-transparent hover:bg-[#F5F5F5] hover:text-[#111111]'
+                    ? 'bg-white/[0.08] text-white'
+                    : 'text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300'
                 )}
               >
-                <Icon className={cn('h-4.5 w-4.5', isActive ? 'text-[#E85D25]' : 'text-[#999999]')} />
+                <Icon className={cn('h-4 w-4', isActive ? 'text-[#E85D25]' : 'text-zinc-600')} />
                 {tab.label}
               </button>
             );
           })}
         </nav>
 
-        {/* Sidebar Footer */}
-        <div className="border-t border-[#E5E5E5] p-3 space-y-1">
+        <div className="border-t border-white/[0.06] p-3 space-y-0.5">
           <button
             onClick={() => { setSettingsOpen(true); setSidebarOpen(false); }}
-            className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#666666] hover:bg-[#F5F5F5] hover:text-[#111111] transition-colors"
+            className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300 transition-colors"
           >
-            <Settings className="h-4.5 w-4.5 text-[#999999]" />
+            <Settings className="h-4 w-4" />
             Settings
           </button>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#666666] hover:bg-red-50 hover:text-red-600 transition-colors"
+            className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-zinc-500 hover:bg-red-500/10 hover:text-red-400 transition-colors"
           >
-            <LogOut className="h-4.5 w-4.5" />
+            <LogOut className="h-4 w-4" />
             Logout
           </button>
         </div>
       </aside>
 
-      {/* Main Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Header Bar */}
-        <header className="sticky top-0 z-30 h-16 bg-white border-b border-[#E5E5E5] flex items-center justify-between px-4 md:px-6">
+        <header className="sticky top-0 z-30 h-14 bg-[#09090b]/80 backdrop-blur-md border-b border-white/[0.06] flex items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-[#F5F5F5] transition-colors"
+              className="lg:hidden p-2 rounded-lg hover:bg-white/[0.06] transition-colors"
             >
-              <Menu className="h-5 w-5 text-[#666666]" />
+              <Menu className="h-4 w-4 text-zinc-400" />
             </button>
-            <h1 className="text-base font-semibold text-[#111111]">{TAB_TITLES[activeTab]}</h1>
+            <h1 className="text-sm font-medium text-zinc-200">{TAB_TITLES[activeTab]}</h1>
             {sttStatus === 'recording' && activeTab === 'stt' && (
-              <Badge variant="outline" className={cn('gap-1.5 text-xs animate-pulse hidden sm:flex', sttSource === 'webspeech' ? 'border-orange-300 text-orange-600' : 'border-amber-300 text-amber-600')}>
+              <Badge variant="outline" className={cn('gap-1.5 text-[11px] animate-pulse hidden sm:flex border-red-500/30 text-red-400 bg-red-500/10', sttSource === 'webspeech' ? '' : 'border-amber-500/30 text-amber-400 bg-amber-500/10')}>
                 {sttSource === 'webspeech' ? <Wifi className="h-3 w-3" /> : <Radio className="h-3 w-3" />}
                 {sttSource === 'webspeech' ? 'LIVE' : 'GROQ'}
               </Badge>
             )}
             {!hasAnyKey && (
-              <Badge variant="outline" className="gap-1 text-xs border-amber-300 text-amber-600 hidden sm:flex">
+              <Badge variant="outline" className="gap-1 text-[11px] border-amber-500/30 text-amber-400 bg-amber-500/10 hidden sm:flex">
                 <WifiOff className="h-3 w-3" />No API Key
               </Badge>
             )}
@@ -172,24 +164,23 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSettingsOpen(true)}
-              className="hidden md:flex p-2 rounded-lg hover:bg-[#F5F5F5] transition-colors"
+              className="hidden md:flex p-2 rounded-lg hover:bg-white/[0.06] transition-colors"
             >
-              <Settings className="h-4.5 w-4.5 text-[#999999]" />
+              <Settings className="h-4 w-4 text-zinc-500" />
             </button>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               {user?.image ? (
-                <img src={user.image} className="h-8 w-8 rounded-full" alt={user.name || ''} />
+                <img src={user.image} className="h-7 w-7 rounded-full ring-2 ring-white/10" alt={user.name || ''} />
               ) : (
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E85D25] text-white text-sm font-bold">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#E85D25] text-white text-xs font-bold">
                   {user?.name?.[0] || '?'}
                 </div>
               )}
-              <span className="text-sm font-medium text-[#111111] hidden sm:block">{user?.name || 'Player'}</span>
+              <span className="text-sm text-zinc-300 hidden sm:block">{user?.name || 'Player'}</span>
             </div>
           </div>
         </header>
 
-        {/* Content Area */}
         <main className="flex-1 p-4 md:p-6">
           <div className="max-w-4xl mx-auto">
             {activeTab === 'stt' && <STTPanel />}
