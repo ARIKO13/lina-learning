@@ -53,13 +53,17 @@ export interface QuizQuestion {
   difficulty: 'easy' | 'medium' | 'hard';
 }
 
+import { TIERS, type Tier } from './tiers';
+
 export interface GameResult {
   score: number;
   correctCount: number;
   total: number;
   xpEarned: number;
   streak: number;
-  newLevel: number;
+  newTier: Tier;
+  prevTier: Tier;
+  tierUp: boolean;
   totalXP: number;
   perfectBonus: number;
   streakBonus: number;

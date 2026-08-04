@@ -1,42 +1,41 @@
 import { NextAuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
 
-// We use a credential-based approach for the sandbox.
-// In production, swap this with GoogleProvider.
-// The Google login flow is simulated here for demo.
+const useGoogle = !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET;
+
+const providers = useGoogle
+  ? [
+      GoogleProvider({
+        clientId: process.env.GOOGLE_CLIENT_ID!,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        authorization: {
+          params: {
+            prompt: 'consent',
+            access_type: 'offline',
+            scope: 'openid email profile',
+          },
+        },
+      }),
+    ]
+  : [];
+
 export const authOptions: NextAuthOptions = {
-  providers: [
-    CredentialsProvider({
-      name: 'Google',
-      credentials: {
-        email: { label: 'Email', type: 'email' },
-        name: { label: 'Name', type: 'text' },
-        image: { label: 'Avatar URL', type: 'text' },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email) return null;
-        // In production: verify Google token server-side
-        // Here we accept any Google email for sandbox demo
-        return {
-          id: crypto.randomUUID(),
-          email: credentials.email as string,
-          name: (credentials.name as string) || credentials.email.split('@')[0],
-          image: (credentials.image as string) || null,
-        };
-      },
-    }),
-  ],
+  providers,
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 30 * 24 * 60 * 60,
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
         token.picture = user.image;
+      }
+      // Store Google OAuth ID when available
+      if (account?.provider === 'google') {
+        token.googleId = account.providerAccountId;
       }
       return token;
     },
@@ -49,8 +48,30 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+    async signIn({ user, account }) {
+      // When Google OAuth is used, sync user to our DB
+      if (account?.provider === 'google' && user.email) {
+        const { db } = await import('@/lib/db');
+        const existingUser = await db.user.findUnique({ where: { email: user.email } });
+        if (!existingUser) {
+          await db.user.create({
+            data: {
+              id: user.id,
+              googleId: account.providerAccountId,
+              email: user.email,
+              name: user.name || 'Player',
+              image: user.image,
+            },
+          });
+        }
+      }
+      return true;
+    },
   },
   pages: {
     signIn: '/',
   },
+  secret: process.env.NEXTAUTH_SECRET || 'arushiko-stt-dev-secret-change-in-production',
 };
+
+export const isGoogleAuthConfigured = useGoogle;

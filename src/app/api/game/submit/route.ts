@@ -2,19 +2,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { getTierForXP } from '@/lib/tiers';
 
 const XP_PER_DIFFICULTY = { easy: 10, medium: 20, hard: 30 };
 const STREAK_BONUS = 5;
 const PERFECT_BONUS = 50;
-
-const LEVEL_THRESHOLDS = [0, 100, 300, 600, 1000, 1500, 2200, 3000, 4000, 5200, 6600, 8200, 10000, 12000, 14500, 17500, 21000, 25000, 30000, 36000];
-
-function calcLevel(xp: number): number {
-  for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
-    if (xp >= LEVEL_THRESHOLDS[i]) return i + 1;
-  }
-  return 1;
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,72 +26,49 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    // Perfect score bonus
     if (score === 100) totalXP += PERFECT_BONUS;
 
-    // Upsert user
     const existingUser = await db.user.findUnique({ where: { id: userId } });
     let streak = existingUser?.streak || 0;
     const lastActive = existingUser?.lastActiveAt;
 
-    // Calculate streak (real-life consecutive days)
     if (lastActive) {
       const lastDate = new Date(lastActive).toISOString().split('T')[0];
       const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
       if (lastDate === yesterday) {
         streak += 1;
-        totalXP += STREAK_BONUS * streak; // Streak bonus
+        totalXP += STREAK_BONUS * streak;
       } else if (lastDate !== today) {
-        streak = 1; // Reset streak
+        streak = 1;
       }
     } else {
       streak = 1;
     }
 
     const newXP = (existingUser?.xp || 0) + totalXP;
-    const newLevel = calcLevel(newXP);
+    const newTier = getTierForXP(newXP);
+    const prevTier = getTierForXP(existingUser?.xp || 0);
+    const tierUp = newTier.level > prevTier.level;
 
     await db.user.upsert({
       where: { id: userId },
-      update: {
-        xp: newXP,
-        level: newLevel,
-        streak,
-        lastActiveAt: new Date(),
-      },
+      update: { xp: newXP, level: newTier.level, streak, lastActiveAt: new Date() },
       create: {
         id: userId,
         googleId: userId,
         email: `${userId}@local`,
         name: 'Player',
         xp: totalXP,
-        level: calcLevel(totalXP),
+        level: 1,
         streak: 1,
         lastActiveAt: new Date(),
       },
     });
 
-    // Save daily progress (upsert)
     await db.dailyProgress.upsert({
       where: { userId_date: { userId, date: today } },
-      update: {
-        topic,
-        score: Math.max(existingUser ? 0 : 0, score),
-        xpEarned: totalXP,
-        questionsCount: questions.length,
-        correctCount,
-        timeSpentSeconds: timeSpentSeconds || 0,
-      },
-      create: {
-        userId,
-        date: today,
-        topic,
-        score,
-        xpEarned: totalXP,
-        questionsCount: questions.length,
-        correctCount,
-        timeSpentSeconds: timeSpentSeconds || 0,
-      },
+      update: { topic, score: Math.max(score, existingUser ? 0 : 0), xpEarned: totalXP, questionsCount: questions.length, correctCount, timeSpentSeconds: timeSpentSeconds || 0 },
+      create: { userId, date: today, topic, score, xpEarned: totalXP, questionsCount: questions.length, correctCount, timeSpentSeconds: timeSpentSeconds || 0 },
     });
 
     return NextResponse.json({
@@ -108,7 +77,9 @@ export async function POST(req: NextRequest) {
       total: questions.length,
       xpEarned: totalXP,
       streak,
-      newLevel,
+      newTier,
+      prevTier,
+      tierUp,
       totalXP: newXP,
       perfectBonus: score === 100 ? PERFECT_BONUS : 0,
       streakBonus: streak > 1 ? STREAK_BONUS * streak : 0,
