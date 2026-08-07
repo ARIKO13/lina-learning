@@ -21,6 +21,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Sertifikat tidak ditemukan atau sudah expired' }, { status: 404 });
     }
 
+    // Fetch user's custom display name
+    let userName: string | undefined;
+    try {
+      const u = await db.user.findUnique({ where: { id: cert.userId } });
+      userName = u?.name || undefined;
+    } catch {}
+
     return NextResponse.json({
       id: cert.id,
       season: cert.season,
@@ -33,6 +40,7 @@ export async function GET(req: NextRequest) {
       expiresAt: cert.expiresAt,
       shareCode: cert.shareCode,
       daysUntilExpiry: Math.max(0, Math.ceil((new Date(cert.expiresAt).getTime() - Date.now()) / 86400000)),
+      userName,
     });
   } catch (error) {
     return NextResponse.json({ error: 'Gagal mengambil sertifikat' }, { status: 500 });

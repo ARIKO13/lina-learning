@@ -1,34 +1,25 @@
-import { NextAuthOptions } from 'next-auth';
+import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 
-export const authOptions: NextAuthOptions = {
+export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          prompt: 'consent',
-          access_type: 'offline',
-          scope: 'openid email profile',
-        },
-      },
     }),
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 30 * 24 * 60 * 60,
   },
   callbacks: {
     async jwt({ token, user, account }) {
-      // First login: store Google sub as the user ID
       if (user) {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
         token.picture = user.image;
       }
-      // Store Google OAuth provider account ID (Google sub)
       if (account?.provider === 'google') {
         token.googleSub = account.providerAccountId;
         token.id = account.providerAccountId;
@@ -46,33 +37,31 @@ export const authOptions: NextAuthOptions = {
     },
     async signIn({ user, account }) {
       if (account?.provider === 'google' && user.email) {
-        const { db } = await import('@/lib/db');
-        const googleSub = account.providerAccountId;
-
-        // Check if user exists by googleId
-        let existingUser = await db.user.findUnique({ where: { googleId: googleSub } });
-
-        if (!existingUser) {
-          // Check by email in case of migration
-          existingUser = await db.user.findUnique({ where: { email: user.email } });
-          if (existingUser) {
-            // Update existing user with Google ID
-            await db.user.update({
-              where: { id: existingUser.id },
-              data: { googleId: googleSub, image: user.image },
-            });
-          } else {
-            // Create new user
-            await db.user.create({
-              data: {
-                id: googleSub,
-                googleId: googleSub,
-                email: user.email,
-                name: user.name || 'Player',
-                image: user.image,
-              },
-            });
+        try {
+          const { db } = await import('@/lib/db');
+          const googleSub = account.providerAccountId;
+          let existingUser = await db.user.findUnique({ where: { googleId: googleSub } });
+          if (!existingUser) {
+            existingUser = await db.user.findUnique({ where: { email: user.email } });
+            if (existingUser) {
+              await db.user.update({
+                where: { id: existingUser.id },
+                data: { googleId: googleSub, image: user.image },
+              });
+            } else {
+              await db.user.create({
+                data: {
+                  id: googleSub,
+                  googleId: googleSub,
+                  email: user.email,
+                  name: user.name || 'Player',
+                  image: user.image,
+                },
+              });
+            }
           }
+        } catch (dbError) {
+          console.error('signIn DB error (non-blocking):', dbError);
         }
       }
       return true;
@@ -80,6 +69,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/',
+    error: '/auth-error',
   },
   secret: process.env.NEXTAUTH_SECRET,
-};
+});

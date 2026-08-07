@@ -20,6 +20,7 @@ interface CertData {
   expiresAt: string;
   shareCode: string;
   daysUntilExpiry: number;
+  userName?: string;
 }
 
 export function CertificateView() {
@@ -67,7 +68,7 @@ export function CertificateView() {
                 <div className="py-2">
                   <p className="text-xs text-zinc-500">Diberikan kepada</p>
                   <p className="text-2xl font-bold mt-1 bg-gradient-to-r from-[#E85D25] to-amber-400 bg-clip-text text-transparent">
-                    {user.name}
+                    {cert.userName || user.name}
                   </p>
                 </div>
 
