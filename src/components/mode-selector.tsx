@@ -27,7 +27,6 @@ export function ModeSelector() {
     setGeneratedContent,
     isGenerating,
     setIsGenerating,
-    apiKeys,
     selectedModel,
     addAiMessage,
   } = useAppStore();
@@ -64,16 +63,6 @@ Gunakan format markdown yang rapi dan terstruktur.`
 Gunakan format markdown yang rapi dan kreatif.`;
 
     try {
-      // Determine which API to use based on available keys
-      let modelToUse = selectedModel;
-      const modelInfo = MODEL_LIST.find((m) => m.id === modelToUse);
-
-      if (modelInfo?.provider === 'gemini' && !apiKeys.gemini) {
-        modelToUse = apiKeys.groq ? 'groq-llama-3.3-70b' : modelToUse;
-      } else if (modelInfo?.provider === 'groq' && !apiKeys.groq) {
-        modelToUse = apiKeys.gemini ? 'gemini-2.5-flash' : modelToUse;
-      }
-
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -81,8 +70,7 @@ Gunakan format markdown yang rapi dan kreatif.`;
           messages: [
             { role: 'user', content: `Berikut transkrip yang perlu diproses:\n\n${transcript}` },
           ],
-          model: modelToUse,
-          apiKeys,
+          model: selectedModel,
           systemPrompt,
         }),
       });
@@ -94,7 +82,7 @@ Gunakan format markdown yang rapi dan kreatif.`;
       addAiMessage({
         role: 'assistant',
         content: data.content,
-        model: modelToUse,
+        model: selectedModel,
       });
       toast.success(`${mode === 'pdf' ? 'Modul PDF' : 'Game Kompetisi'} berhasil dibuat!`);
     } catch (error) {

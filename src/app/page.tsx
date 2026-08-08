@@ -34,7 +34,7 @@ const TAB_TITLES: Record<TabId, string> = {
 };
 
 export default function Home() {
-  const { user, setUser, activeTab, setActiveTab, setSettingsOpen, sttSource, sttStatus, apiKeys } = useAppStore();
+  const { user, setUser, activeTab, setActiveTab, setSettingsOpen, sttSource, sttStatus } = useAppStore();
   const { data: session, status } = useSession();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -59,8 +59,6 @@ export default function Home() {
   }
 
   if (!user) return <LoginScreen />;
-
-  const hasAnyKey = !!(apiKeys.groq || apiKeys.gemini || apiKeys.cloudflare);
 
   const handleLogout = async () => {
     setUser(null);
@@ -154,11 +152,7 @@ export default function Home() {
                 {sttSource === 'webspeech' ? 'LIVE' : 'GROQ'}
               </Badge>
             )}
-            {!hasAnyKey && (
-              <Badge variant="outline" className="gap-1 text-[11px] border-amber-500/30 text-amber-400 bg-amber-500/10 hidden sm:flex">
-                <WifiOff className="h-3 w-3" />No API Key
-              </Badge>
-            )}
+
           </div>
 
           <div className="flex items-center gap-3">

@@ -23,7 +23,7 @@ const DIFFICULTY_XP = { easy: 10, medium: 20, hard: 30 };
 
 export function GamePanel() {
   const {
-    user, transcript, apiKeys, selectedModel,
+    user, transcript, selectedModel,
     quizQuestions, setQuizQuestions, currentQuestionIdx, setCurrentQuestionIdx,
     selectedAnswers, setSelectedAnswer, gamePhase, setGamePhase,
     gameResult, setGameResult, isGeneratingQuiz, setIsGeneratingQuiz,
@@ -53,7 +53,7 @@ export function GamePanel() {
     try {
       const res = await fetch('/api/game/generate', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transcript, apiKey: apiKeys, model: selectedModel }),
+        body: JSON.stringify({ transcript, model: selectedModel }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -63,7 +63,7 @@ export function GamePanel() {
       toast.error(e instanceof Error ? e.message : 'Gagal generate quiz');
       setGamePhase('idle');
     } finally { setIsGeneratingQuiz(false); }
-  }, [transcript, user, apiKeys, selectedModel, setIsGeneratingQuiz, setGamePhase, setSelectedAnswer, setCurrentQuestionIdx, setQuizQuestions, setQuizTopic]);
+  }, [transcript, user, selectedModel, setIsGeneratingQuiz, setGamePhase, setSelectedAnswer, setCurrentQuestionIdx, setQuizQuestions, setQuizTopic]);
 
   const submitQuiz = useCallback(async () => {
     if (!user || quizQuestions.length === 0) return;

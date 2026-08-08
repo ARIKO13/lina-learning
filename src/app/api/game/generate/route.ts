@@ -44,7 +44,7 @@ Kembalikan HANYA JSON array tanpa markdown. Format:
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages: [{ role: 'user', content: prompt }],
-        model: model || 'gemini-2.5-flash',
+        model: model || 'gemini-3.6-flash',
         systemPrompt: 'Kamu adalah game master edukasi. Hanya kembalikan valid JSON array. Jangan gunakan markdown code blocks.',
       }),
     });

@@ -13,36 +13,29 @@ export type STTSource = 'webspeech' | 'groq';
 export type STTStatus = 'idle' | 'recording' | 'processing' | 'error';
 
 export type AIModel =
-  | 'gemini-2.5-flash'
-  | 'gemini-2.5-pro'
-  | 'groq-llama-3.3-70b'
-  | 'groq-deepseek-r1-distill-llama-70b'
-  | 'cf-glm-4'
-  | 'cf-kimi-k2'
-  | 'cf-gemma-3-27b';
+  | 'gemini-3.6-flash'
+  | 'claude-sonnet-5'
+  | 'deepseek-v4-flash'
+  | 'deepseek-v4-pro'
+  | 'deepseek-reasoner'
+  | 'auto';
 
 export interface ModelInfo {
   id: AIModel;
   name: string;
-  provider: 'gemini' | 'groq' | 'cloudflare';
+  provider: 'polyvor';
+  gateway: string;
+  gatewayModel: string;
 }
 
 export const MODEL_LIST: ModelInfo[] = [
-  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', provider: 'gemini' },
-  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', provider: 'gemini' },
-  { id: 'groq-llama-3.3-70b', name: 'Llama 3.3 70B', provider: 'groq' },
-  { id: 'groq-deepseek-r1-distill-llama-70b', name: 'DeepSeek R1 70B', provider: 'groq' },
-  { id: 'cf-glm-4', name: 'GLM-4', provider: 'cloudflare' },
-  { id: 'cf-kimi-k2', name: 'Kimi K2', provider: 'cloudflare' },
-  { id: 'cf-gemma-3-27b', name: 'Gemma 3 27B', provider: 'cloudflare' },
+  { id: 'gemini-3.6-flash', name: 'Gemini 3.6 Flash', provider: 'polyvor', gateway: 'server3', gatewayModel: 'gemini-3.6-flash' },
+  { id: 'claude-sonnet-5', name: 'Claude Sonnet 5', provider: 'polyvor', gateway: 'server3', gatewayModel: 'claude-sonnet-5' },
+  { id: 'deepseek-v4-flash', name: 'DeepSeek V4 Flash', provider: 'polyvor', gateway: 'server3', gatewayModel: 'deepseek-v4-flash' },
+  { id: 'deepseek-v4-pro', name: 'DeepSeek V4 Pro', provider: 'polyvor', gateway: 'server2', gatewayModel: 'ds/deepseek-v4-pro' },
+  { id: 'deepseek-reasoner', name: 'DeepSeek Reasoner', provider: 'polyvor', gateway: 'server2', gatewayModel: 'ds/deepseek-reasoner' },
+  { id: 'auto', name: 'Auto (AI Pilih)', provider: 'polyvor', gateway: 'server3', gatewayModel: 'auto' },
 ];
-
-export interface ApiKeys {
-  groq: string;
-  gemini: string;
-  cloudflare: string;
-  cloudflareAccountId: string;
-}
 
 export interface QuizQuestion {
   id: number;
@@ -85,10 +78,6 @@ interface AppState {
   // Auth
   user: { id: string; email: string; name: string; image?: string | null } | null;
   setUser: (user: AppState['user']) => void;
-
-  // API Keys
-  apiKeys: ApiKeys;
-  setApiKeys: (keys: Partial<ApiKeys>) => void;
 
   // STT
   sttStatus: STTStatus;
@@ -150,10 +139,6 @@ export const useAppStore = create<AppState>()(
       user: null,
       setUser: (user) => set({ user }),
 
-      // API Keys
-      apiKeys: { groq: '', gemini: '', cloudflare: '', cloudflareAccountId: '' },
-      setApiKeys: (keys) => set((s) => ({ apiKeys: { ...s.apiKeys, ...keys } })),
-
       // STT
       sttStatus: 'idle',
       setSttStatus: (sttStatus) => set({ sttStatus }),
@@ -175,7 +160,7 @@ export const useAppStore = create<AppState>()(
         aiMessages: [...s.aiMessages, { ...msg, id: crypto.randomUUID(), timestamp: Date.now() }],
       })),
       clearAiMessages: () => set({ aiMessages: [] }),
-      selectedModel: 'gemini-2.5-flash',
+      selectedModel: 'gemini-3.6-flash',
       setSelectedModel: (selectedModel) => set({ selectedModel }),
       isAiLoading: false,
       setIsAiLoading: (isAiLoading) => set({ isAiLoading }),
@@ -215,7 +200,6 @@ export const useAppStore = create<AppState>()(
     {
       name: 'lina-learning-v1',
       partialize: (state) => ({
-        apiKeys: state.apiKeys,
         selectedModel: state.selectedModel,
         user: state.user,
       }),

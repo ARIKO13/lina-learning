@@ -8,137 +8,72 @@ interface ChatMessage {
 interface ChatRequest {
   messages: ChatMessage[];
   model: string;
-  apiKeys: {
-    gemini?: string;
-    groq?: string;
-    cloudflare?: string;
-    cloudflareAccountId?: string;
-  };
   systemPrompt?: string;
 }
 
-// Cloudflare model mapping
-const CF_MODELS: Record<string, string> = {
-  'cf-glm-4': '@cf/thinklm/glms',
-  'cf-kimi-k2': '@cf/moonshotai/kimi-k2-instruct',
-  'cf-gemma-3-27b': '@cf/google/gemma-3-27b-it',
+// Polyvor Labs Gateway config
+const GATEWAY_BASE = 'https://gateway.polyvorlabs.com/api/gateway';
+
+// Model routing: which server + model name for each frontend model ID
+const MODEL_ROUTING: Record<string, { server: string; model: string }> = {
+  'gemini-3.6-flash': { server: 'server3', model: 'gemini-3.6-flash' },
+  'claude-sonnet-5': { server: 'server3', model: 'claude-sonnet-5' },
+  'deepseek-v4-flash': { server: 'server3', model: 'deepseek-v4-flash' },
+  'deepseek-v4-pro': { server: 'server2', model: 'ds/deepseek-v4-pro' },
+  'deepseek-reasoner': { server: 'server2', model: 'ds/deepseek-reasoner' },
+  'auto': { server: 'server3', model: 'auto' },
 };
 
-// Groq model mapping
-const GROQ_MODELS: Record<string, string> = {
-  'groq-llama-3.3-70b': 'llama-3.3-70b-versatile',
-  'groq-deepseek-r1-distill-llama-70b': 'deepseek-r1-distill-llama-70b',
-};
+function buildPrompt(messages: ChatMessage[], systemPrompt?: string): string {
+  const parts: string[] = [];
 
-// Gemini model mapping
-const GEMINI_MODELS: Record<string, string> = {
-  'gemini-2.5-flash': 'gemini-2.5-flash-preview-05-20',
-  'gemini-2.5-pro': 'gemini-2.5-pro-preview-05-06',
-};
-
-async function callGemini(messages: ChatMessage[], model: string, apiKey: string, systemPrompt?: string) {
-  const geminiModel = GEMINI_MODELS[model] || 'gemini-2.5-flash-preview-05-20';
-
-  const contents = messages
-    .filter((m) => m.role !== 'system')
-    .map((m) => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }],
-    }));
-
-  const body: Record<string, unknown> = { contents };
   if (systemPrompt) {
-    body.systemInstruction = { parts: [{ text: systemPrompt }] };
+    parts.push(`[System]: ${systemPrompt}`);
   }
-  body.generationConfig = {
-    temperature: 0.7,
-    maxOutputTokens: 8192,
-  };
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+  for (const msg of messages) {
+    if (msg.role === 'system') {
+      parts.push(`[System]: ${msg.content}`);
+    } else if (msg.role === 'user') {
+      parts.push(`[User]: ${msg.content}`);
+    } else if (msg.role === 'assistant') {
+      parts.push(`[Assistant]: ${msg.content}`);
     }
-  );
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Gemini API error (${res.status}): ${err}`);
   }
 
-  const data = await res.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  return text;
+  return parts.join('\n\n');
 }
 
-async function callGroq(messages: ChatMessage[], model: string, apiKey: string) {
-  const groqModel = GROQ_MODELS[model] || 'llama-3.3-70b-versatile';
+async function callGateway(prompt: string, modelId: string, apiKey: string): Promise<string> {
+  const route = MODEL_ROUTING[modelId];
+  if (!route) throw new Error(`Unknown model: ${modelId}`);
 
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const url = `${GATEWAY_BASE}/${route.server}`;
+
+  const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
+      'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: groqModel,
-      messages: messages.map((m) => ({ role: m.role, content: m.content })),
-      temperature: 0.7,
-      max_tokens: 8192,
+      prompt,
+      model: route.model,
     }),
   });
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`Groq API error (${res.status}): ${err}`);
+    throw new Error(`Gateway API error (${res.status}): ${err}`);
   }
 
   const data = await res.json();
-  return data.choices?.[0]?.message?.content || '';
-}
-
-async function callCloudflare(
-  messages: ChatMessage[],
-  model: string,
-  apiKey: string,
-  accountId: string
-) {
-  const cfModel = CF_MODELS[model];
-  if (!cfModel) throw new Error(`Unknown Cloudflare model: ${model}`);
-
-  // Convert to a simple prompt format for CF Workers AI
-  const prompt = messages
-    .map((m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
-    .join('\n\n') + '\n\nAssistant:';
-
-  const res = await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${cfModel}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        messages: messages.map((m) => ({ role: m.role, content: m.content })),
-      }),
-    }
-  );
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Cloudflare API error (${res.status}): ${err}`);
-  }
-
-  const data = await res.json();
-  return data.result?.response || data.result || '';
+  // The gateway might return the response in different formats
+  return data.response || data.content || data.text || data.choices?.[0]?.message?.content || JSON.stringify(data);
 }
 
 export async function POST(req: NextRequest) {
- try {
+  try {
     const body: ChatRequest = await req.json();
     const { messages, model, systemPrompt } = body;
 
@@ -146,32 +81,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Messages are required' }, { status: 400 });
     }
 
-    // Server-side API keys only — never accept from client
-    const GEMINI_KEY = process.env.GEMINI_API_KEY;
-    const GROQ_KEY = process.env.GROQ_API_KEY;
-    const CF_KEY = process.env.CF_API_TOKEN;
-    const CF_ACCOUNT = process.env.CF_ACCOUNT_ID;
-
-    let result = '';
-
-    if (model.startsWith('gemini')) {
-      if (!GEMINI_KEY) {
-        return NextResponse.json({ error: 'AI service unavailable' }, { status: 503 });
-      }
-      result = await callGemini(messages, model, GEMINI_KEY, systemPrompt);
-    } else if (model.startsWith('groq')) {
-      if (!GROQ_KEY) {
-        return NextResponse.json({ error: 'AI service unavailable' }, { status: 503 });
-      }
-      result = await callGroq(messages, model, GROQ_KEY);
-    } else if (model.startsWith('cf-')) {
-      if (!CF_KEY || !CF_ACCOUNT) {
-        return NextResponse.json({ error: 'AI service unavailable' }, { status: 503 });
-      }
-      result = await callCloudflare(messages, model, CF_KEY, CF_ACCOUNT);
-    } else {
-      return NextResponse.json({ error: `Unknown model: ${model}` }, { status: 400 });
+    const apiKey = process.env.GATEWAY_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: 'AI service unavailable' }, { status: 503 });
     }
+
+    const prompt = buildPrompt(messages, systemPrompt);
+    const result = await callGateway(prompt, model, apiKey);
 
     return NextResponse.json({ content: result });
   } catch (error) {
