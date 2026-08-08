@@ -1,6 +1,5 @@
-'use server';
-
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { getTierForXP } from '@/lib/tiers';
 
@@ -10,8 +9,14 @@ const PERFECT_BONUS = 50;
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId, answers, questions, topic, timeSpentSeconds } = await req.json();
-    if (!userId || !answers || !questions) {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { answers, questions, topic, timeSpentSeconds } = await req.json();
+    const userId = session.user.id;
+    if (!answers || !questions) {
       return NextResponse.json({ error: 'Data tidak lengkap' }, { status: 400 });
     }
 

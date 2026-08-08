@@ -140,32 +140,35 @@ async function callCloudflare(
 export async function POST(req: NextRequest) {
  try {
     const body: ChatRequest = await req.json();
-    const { messages, model, apiKeys, systemPrompt } = body;
+    const { messages, model, systemPrompt } = body;
 
     if (!messages || messages.length === 0) {
       return NextResponse.json({ error: 'Messages are required' }, { status: 400 });
     }
 
+    // Server-side API keys only — never accept from client
+    const GEMINI_KEY = process.env.GEMINI_API_KEY;
+    const GROQ_KEY = process.env.GROQ_API_KEY;
+    const CF_KEY = process.env.CF_API_TOKEN;
+    const CF_ACCOUNT = process.env.CF_ACCOUNT_ID;
+
     let result = '';
 
     if (model.startsWith('gemini')) {
-      if (!apiKeys.gemini) {
-        return NextResponse.json({ error: 'Gemini API key is required' }, { status: 401 });
+      if (!GEMINI_KEY) {
+        return NextResponse.json({ error: 'AI service unavailable' }, { status: 503 });
       }
-      result = await callGemini(messages, model, apiKeys.gemini, systemPrompt);
+      result = await callGemini(messages, model, GEMINI_KEY, systemPrompt);
     } else if (model.startsWith('groq')) {
-      if (!apiKeys.groq) {
-        return NextResponse.json({ error: 'Groq API key is required' }, { status: 401 });
+      if (!GROQ_KEY) {
+        return NextResponse.json({ error: 'AI service unavailable' }, { status: 503 });
       }
-      result = await callGroq(messages, model, apiKeys.groq);
+      result = await callGroq(messages, model, GROQ_KEY);
     } else if (model.startsWith('cf-')) {
-      if (!apiKeys.cloudflare || !apiKeys.cloudflareAccountId) {
-        return NextResponse.json(
-          { error: 'Cloudflare API key and Account ID are required' },
-          { status: 401 }
-        );
+      if (!CF_KEY || !CF_ACCOUNT) {
+        return NextResponse.json({ error: 'AI service unavailable' }, { status: 503 });
       }
-      result = await callCloudflare(messages, model, apiKeys.cloudflare, apiKeys.cloudflareAccountId);
+      result = await callCloudflare(messages, model, CF_KEY, CF_ACCOUNT);
     } else {
       return NextResponse.json({ error: `Unknown model: ${model}` }, { status: 400 });
     }

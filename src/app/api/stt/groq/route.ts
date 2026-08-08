@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
   try {
-    const apiKey = req.headers.get('x-groq-api-key');
+    // Server-side API key only
+    const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: 'Groq API key is required' }, { status: 401 });
+      return NextResponse.json({ error: 'STT service unavailable' }, { status: 503 });
     }
 
     const formData = await req.formData();

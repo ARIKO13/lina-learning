@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
 
 interface QuizQuestion {
   id: number;
@@ -11,7 +12,12 @@ interface QuizQuestion {
 
 export async function POST(req: NextRequest) {
   try {
-    const { transcript, apiKey, model } = await req.json();
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { transcript, model } = await req.json();
 
     if (!transcript || transcript.trim().length < 20) {
       return NextResponse.json({ error: 'Transkrip terlalu pendek (min 20 karakter)' }, { status: 400 });
@@ -32,13 +38,13 @@ PENTING:
 Kembalikan HANYA JSON array tanpa markdown. Format:
 [{"id":1,"question":"...","options":["A","B","C","D"],"correctIndex":0,"explanation":"...","difficulty":"easy"}]`;
 
-    const aiRes = await fetch('http://localhost:3000/api/ai/chat', {
+    const baseUrl = process.env.NEXTAUTH_URL || '';
+    const aiRes = await fetch(`${baseUrl}/api/ai/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages: [{ role: 'user', content: prompt }],
         model: model || 'gemini-2.5-flash',
-        apiKeys: { gemini: apiKey?.gemini || '', groq: apiKey?.groq || '', cloudflare: apiKey?.cloudflare || '', cloudflareAccountId: apiKey?.cloudflareAccountId || '' },
         systemPrompt: 'Kamu adalah game master edukasi. Hanya kembalikan valid JSON array. Jangan gunakan markdown code blocks.',
       }),
     });
